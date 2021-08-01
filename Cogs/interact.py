@@ -49,7 +49,7 @@ class events(commands.Cog):
 		
 		if content.startswith('1') or content.startswith('joke'):
 			await channel.send(random_joke())
-		
+		is_chatting = False
 		if content.startswith("chat") or content.startswith("u!chat") or content.startswith('3'):
 			await channel.send(random.choice(starter_conversation))
 			while True:
@@ -65,11 +65,13 @@ class events(commands.Cog):
 					await channel.send("thanks for chatting with me, bye now!")
 					break
 
+				if msg.content.startswith("3") or msg.content.startswith("chat"):
+					await channel.send("Cannot have two chats active at same time. Closing chat.")
+					break
+
 				# The chatbot processes the input and sends back a message
 				response = chatbot.get_response(msg.content)
 				await channel.send(response)
-
-		
 
 		# Prevents '@client.event' from blocking the commands
 		await client.process_commands(message)
