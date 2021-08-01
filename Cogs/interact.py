@@ -6,6 +6,8 @@ import discord
 from discord.ext import commands
 from chatterbot import ChatBot
 from chatterbot.trainers import ChatterBotCorpusTrainer
+from chatterbot.trainers import ListTrainer
+from talk import random_talk
 
 bot_approach = "wussup its ur friend lonely bot here to help u not get lonely. wut do u wanna talk about or hear?\n 1. joke\n 2. video (NOT AVAILABLE RIGHT NOW)\n 3. chat"
 
@@ -15,6 +17,10 @@ starter_conversation = ["wassup!", "hello there!", "yo"]
 
 chatbot.set_trainer(ChatterBotCorpusTrainer)
 chatbot.train("chatterbot.corpus.english.greetings", "chatterbot.corpus.english.conversations")
+chatbot.set_trainer(ListTrainer)
+chatbot.train(random_talk)
+
+end_words = ["bye", "gtg", "cya", "goodbye"]
 
 def random_joke():
 	# Gets the dictionary from the website
@@ -47,10 +53,10 @@ class events(commands.Cog):
 		if client.user.mentioned_in(message):
 			await channel.send(bot_approach)	
 		
-		if content.startswith('1') or content.startswith('joke'):
+		if content == '1' or content.startswith('joke'):
 			await channel.send(random_joke())
 		is_chatting = False
-		if content.startswith("chat") or content.startswith("u!chat") or content.startswith('3'):
+		if content.startswith("chat") or content.startswith("u!chat") or content == '3':
 			await channel.send(random.choice(starter_conversation))
 			while True:
 				# Checks if the message was sent by the author and is in the same channel
@@ -67,6 +73,10 @@ class events(commands.Cog):
 
 				if msg.content.startswith("3") or msg.content.startswith("chat"):
 					await channel.send("Cannot have two chats active at same time. Closing chat.")
+					break
+				
+				if msg.content in end_words:
+					await channel.send("alrighty, thanks for talking!")
 					break
 
 				# The chatbot processes the input and sends back a message
