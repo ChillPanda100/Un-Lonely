@@ -14,7 +14,12 @@ class events(commands.Cog):
 
 	@commands.command()
 	async def help(self, ctx, *args):
-		embedVar = Embed.embed("Help Section", "``u!help``: This message.\n``u!options``: Interact with the bot! (You can also ping instead of using this)\n``u!joke``: Hear a joke!\n``u!credits``:	Displays the credits and people involved.")
+		embedVar = Embed.embed("Help Section", "``u!help``: This message.\n``u!options``: Interact with the bot! (You can also ping instead of using this)\n``u!joke``: Hear a joke!\n``u!end``: Use this while chatting to end chatting (or just say ``end``!)\n ``u!github``: Link to GitHub repository\n``u!credits``: Displays the credits and people involved.")
+		await ctx.send(embed=embedVar)
+	
+	@commands.command()
+	async def github(self, ctx):
+		embedVar = Embed.embed("GitHub Repository", "https://github.com/ChillPanda100/Un-Lonely")
 		await ctx.send(embed=embedVar)
 
 def setup(client):
