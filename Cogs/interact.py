@@ -11,13 +11,19 @@ from talk import random_talk
 
 bot_approach = "wussup its ur friend lonely bot here to help u not get lonely. wut do u wanna talk about or hear?\n 1. joke\n 2. video (NOT AVAILABLE RIGHT NOW)\n 3. chat"
 
-chatbot = ChatBot("UnLonely", logic_adapters=["chatterbot.logic.BestMatch"])
+chatbot = ChatBot("UnLonely", logic_adapters=[
+	"chatterbot.logic.BestMatch",
+	"chatterbot.logic.MathematicalEvaluation",
+	])
 
 starter_conversation = ["wassup!", "hello there!", "yo"]
 
 chatbot.set_trainer(ChatterBotCorpusTrainer)
+
 chatbot.train("chatterbot.corpus.english.greetings", "chatterbot.corpus.english.conversations")
+
 chatbot.set_trainer(ListTrainer)
+
 chatbot.train(random_talk)
 
 end_words = ["bye", "gtg", "cya", "goodbye"]
@@ -50,13 +56,14 @@ class events(commands.Cog):
 	async def on_message(message):
 		content = message.content
 		channel = message.channel
+		
 		if client.user.mentioned_in(message):
 			await channel.send(bot_approach)	
 		
 		if content == '1' or content.startswith('joke'):
 			await channel.send(random_joke())
-		is_chatting = False
-		if content.startswith("chat") or content.startswith("u!chat") or content == '3':
+
+		if content.startswith("chat") or content.startswith("u!chat") or content.startswith("3"):
 			await channel.send(random.choice(starter_conversation))
 			while True:
 				# Checks if the message was sent by the author and is in the same channel
@@ -67,11 +74,11 @@ class events(commands.Cog):
 				msg = await client.wait_for('message', check=check)
 
 				# Ends the conversation if the message startswith "end" or "u!end"
-				if msg.content.startswith("end") or msg.content.startswith("u!end"):
+				if msg.content.lower().startswith("end") or msg.content.lower().startswith("u!end"):
 					await channel.send("thanks for chatting with me, bye now!")
 					break
 
-				if msg.content.startswith("3") or msg.content.startswith("chat"):
+				if msg.content.startswith("u!chat") or msg.content.startswith("chat") or msg.content.startswith("3"):
 					await channel.send("Cannot have two chats active at same time. Closing chat.")
 					break
 				
@@ -82,6 +89,9 @@ class events(commands.Cog):
 				# The chatbot processes the input and sends back a message
 				response = chatbot.get_response(msg.content)
 				await channel.send(response)
+				print(f'User: {msg.content}')
+				print(f'Un-Lonely: {response}')
+				print(str(msg.author) + "\n")
 
 		# Prevents '@client.event' from blocking the commands
 		await client.process_commands(message)
