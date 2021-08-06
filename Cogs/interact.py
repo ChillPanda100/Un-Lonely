@@ -18,6 +18,8 @@ chatbot = ChatBot("UnLonely", logic_adapters=[
 
 starter_conversation = ["wassup!", "hello there!", "yo"]
 
+end_words = ["bye", "gtg", "cya", "goodbye", "u!end", "end"]
+
 chatbot.set_trainer(ChatterBotCorpusTrainer)
 
 chatbot.train("chatterbot.corpus.english.greetings", "chatterbot.corpus.english.conversations")
@@ -25,8 +27,6 @@ chatbot.train("chatterbot.corpus.english.greetings", "chatterbot.corpus.english.
 chatbot.set_trainer(ListTrainer)
 
 chatbot.train(random_talk)
-
-end_words = ["bye", "gtg", "cya", "goodbye"]
 
 def random_joke():
 	# Gets the dictionary from the website
@@ -66,6 +66,7 @@ class events(commands.Cog):
 		if content.startswith("chat") or content.startswith("u!chat") or content.startswith("3"):
 			await channel.send(random.choice(starter_conversation))
 			while True:
+				still_talking = True
 				# Checks if the message was sent by the author and is in the same channel
 				def check(msg):
 					return msg.author == message.author and msg.channel == channel
@@ -73,27 +74,30 @@ class events(commands.Cog):
 				# Waits for a response	
 				msg = await client.wait_for('message', check=check)
 
-				# Ends the conversation if the message startswith "end" or "u!end"
-				if msg.content.lower().startswith("end") or msg.content.lower().startswith("u!end"):
-					await channel.send("thanks for chatting with me, bye now!")
+				msg_content = msg.content.lower()
+
+				# Ends the conversation if any of the words in end_words appears in the message
+				for word in end_words:
+					if word in msg_content:
+						await channel.send("alrighty, thanks for talking!")
+						still_talking = False
+				
+				if not still_talking:
 					break
 
-				if msg.content.startswith("u!chat") or msg.content.startswith("chat") or msg.content.startswith("3"):
+				if msg_content.startswith("u!chat") or msg_content.startswith("chat") or msg_content.startswith("3"):
 					await channel.send("Cannot have two chats active at same time. Closing chat.")
-					break
-				
-				if msg.content in end_words:
-					await channel.send("alrighty, thanks for talking!")
 					break
 
 				# The chatbot processes the input and sends back a message
 				response = chatbot.get_response(msg.content)
 				await channel.send(response)
+
 				print(f'User: {msg.content}')
 				print(f'Un-Lonely: {response}')
 				print(str(msg.author) + "\n")
 
-		# Prevents '@client.event' from blocking the commands
+		# Prevents '@client.event' from blocking the commands being used
 		await client.process_commands(message)
 
 	@commands.command(aliases=["interact"])
