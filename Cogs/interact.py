@@ -58,15 +58,16 @@ class events(commands.Cog):
 		channel = message.channel
 		
 		if client.user.mentioned_in(message):
-			await channel.send(bot_approach)	
+			await message.reply(bot_approach, mention_author=False)	
 		
 		if content == '1' or content.startswith('joke'):
 			await channel.send(random_joke())
 
 		if content.startswith("chat") or content.startswith("u!chat") or content.startswith("3"):
-			await channel.send(random.choice(starter_conversation))
+			await message.reply(random.choice(starter_conversation), mention_author=False)
 			while True:
 				still_talking = True
+
 				# Checks if the message was sent by the author and is in the same channel
 				def check(msg):
 					return msg.author == message.author and msg.channel == channel
@@ -79,19 +80,20 @@ class events(commands.Cog):
 				# Ends the conversation if any of the words in end_words appears in the message
 				for word in end_words:
 					if word in msg_content:
-						await channel.send("alrighty, thanks for talking!")
+						await msg.reply("alrighty, thanks for talking!", mention_author=False)
 						still_talking = False
+						break
 				
 				if not still_talking:
 					break
 
 				if msg_content.startswith("u!chat") or msg_content.startswith("chat") or msg_content.startswith("3"):
-					await channel.send("Cannot have two chats active at same time. Closing chat.")
+					await msg.reply("Cannot have two chats active at same time. Closing chat.", mention_author=False)
 					break
 
 				# The chatbot processes the input and sends back a message
 				response = chatbot.get_response(msg.content)
-				await channel.send(response)
+				await msg.reply(response, mention_author=False)
 
 				print(f'User: {msg.content}')
 				print(f'Un-Lonely: {response}')
@@ -102,7 +104,7 @@ class events(commands.Cog):
 
 	@commands.command(aliases=["interact"])
 	async def options(self, message):
-		await message.channel.send(bot_approach)
+		await message.reply(bot_approach, mention_author=False)
 
 	@commands.command()
 	async def joke(self, message):
